@@ -667,24 +667,19 @@ body {
 .badge-gold { background: rgba(255,215,0,0.14); }
 .badge-red { background: rgba(244,63,94,0.18); }
 
-/* ===== CPX MANDATORY SURVEY GATE ===== */
-#cpx-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(9,9,11,0.96);align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;}
-#cpx-gate.show{display:flex;}
-#cpx-gate .cpx-box{width:100%;max-width:560px;background:#18181b;border:1px solid rgba(192,132,252,.35);border-radius:16px;padding:14px;margin:auto 0;}
-#cpx-gate .cpx-title{color:#fff;font-weight:800;font-size:17px;text-align:center;margin-bottom:6px;}
-#cpx-gate .cpx-sub{color:#a1a1aa;font-size:13px;text-align:center;margin-bottom:10px;line-height:1.6;}
-#cpx-gate iframe{display:block;width:100%;border:0;border-radius:10px;background:#fff;}
+/* ===== UNITY ADS GATE ===== */
+#ad-wait{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(9,9,11,0.92);align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#fff;text-align:center;padding:24px;}
+#ad-wait.show{display:flex;}
+#ad-wait .ad-t{font-weight:800;font-size:17px;}
+#ad-wait .ad-s{color:#a1a1aa;font-size:13px;line-height:1.7;max-width:320px;}
 </style>
 </head>
 <body>
 
-<!-- CPX MANDATORY SURVEY MODAL (no close button by design) -->
-<div id="cpx-gate" role="dialog" aria-modal="true" aria-label="استبيان إجباري">
-  <div class="cpx-box">
-    <div class="cpx-title">📋 استبيان إجباري</div>
-    <div class="cpx-sub">لازم تكمّل الاستبيان الأول عشان تقدر تكمّل للعبة.</div>
-    <div id="cpx-frame-holder"></div>
-  </div>
+<!-- UNITY ADS: شاشة انتظار أثناء عرض الإعلان (بدون زر إغلاق) -->
+<div id="ad-wait" role="dialog" aria-modal="true">
+  <div class="ad-t">📺 جاري تحميل الإعلان...</div>
+  <div class="ad-s">لازم تشوف الإعلان كامل عشان تكمّل.</div>
 </div>
 
 
@@ -1035,64 +1030,77 @@ function _joinRoomReal(){
 }
 
 
-/* ===== CPX MANDATORY SURVEY GATE =====
-   - يظهر عند كل ضغطة على (إنشاء غرفة) أو (الانضمام لغرفة).
-   - مفيش زر إغلاق ولا تجاوز. الحالة في متغيرات الصفحة فقط (بدون sessionStorage/localStorage).
-   - النافذة بتتقفل فقط من خلال completeSurvey() اللي بتتنادى من إشارة إتمام حقيقية (شوف الملاحظة تحت). */
-const CPX_APP_ID   = '37544';
-const CPX_USER_ID  = 'GUEST';
-const CPX_ORIGIN   = 'https://offers.cpx-research.com';
-let _cpxPendingAction = null;
+/* ===== UNITY ADS REWARDED GATE =====
+   Unity Ads مش بيشتغل في متصفح عادي؛ ده SDK أصلي لأندرويد/iOS.
+   لازم الصفحة تتشغّل داخل تطبيق أندرويد (WebView) فيه Bridge باسم UnityAdsBridge.
+   العقد بين الصفحة والتطبيق:
+     JS  -> native : UnityAdsBridge.showRewarded(requestId, gameId, placementId)
+     native -> JS  : window.onUnityAdResult(requestId, status)
+        status = 'COMPLETED' | 'SKIPPED' | 'FAILED' | 'NOT_READY'
+   الدخول/اللعب مش بيتم إلا لما status === 'COMPLETED'. مفيش أي تجاوز. */
+const UNITY_GAME_ID      = '800408090';
+const UNITY_PLACEMENT_ID = 'BP_Rewarded_Android';
+const AD_TIMEOUT_MS      = 120000;   // لو التطبيق ما رجّعش نتيجة نعتبرها فشل
+let _adBusy=false, _adReq=0, _adResolve=null, _adTimer=null;
 
-function _cpxValidate(kind){
+function _adSetBusy(on){
+  _adBusy=on;
+  document.getElementById('ad-wait').classList.toggle('show',on);
+  ['createRoomBtn','joinRoomBtn','newGameBtn'].forEach(id=>{
+    const b=document.getElementById(id); if(b) b.disabled=on;
+  });
+}
+
+function _adFinish(status){
+  clearTimeout(_adTimer); _adTimer=null;
+  const r=_adResolve; _adResolve=null;
+  if(r) r(status);
+}
+
+// native -> JS (بيتقبل فقط لو الـ requestId مطابق للطلب الحالي)
+window.onUnityAdResult=function(requestId,status){
+  if(!_adResolve || String(requestId)!==String(_adReq)) return;
+  _adFinish(String(status).toUpperCase());
+};
+
+function _showRewardedAd(){
+  return new Promise(resolve=>{
+    const bridge=window.UnityAdsBridge;
+    if(!bridge || typeof bridge.showRewarded!=='function'){ resolve('UNSUPPORTED'); return; }
+    _adReq++;
+    _adResolve=resolve;
+    _adTimer=setTimeout(()=>_adFinish('FAILED'),AD_TIMEOUT_MS);
+    try{ bridge.showRewarded(String(_adReq),UNITY_GAME_ID,UNITY_PLACEMENT_ID); }
+    catch(e){ _adFinish('FAILED'); }
+  });
+}
+
+function requireRewardedAd(action){
+  if(_adBusy) return;
+  _adSetBusy(true);
+  _showRewardedAd().then(status=>{
+    _adSetBusy(false);
+    if(status==='COMPLETED'){ action(); return; }
+    const msg = status==='UNSUPPORTED' ? 'الإعلانات متاحة داخل تطبيق الأندرويد فقط'
+              : status==='SKIPPED'     ? 'لازم تشوف الإعلان كامل عشان تكمّل'
+              : status==='NOT_READY'   ? 'الإعلان مش جاهز دلوقتي، جرّب تاني بعد شوية'
+              :                          'حصل خطأ في تحميل الإعلان، جرّب تاني';
+    showToast(msg,true);
+  });
+}
+
+function createRoom(){
   const name=document.getElementById('playerName').value.trim();
-  if(kind==='create'){ if(!name){ showToast(t('enterName'),true); return false; } }
-  else {
-    const code=document.getElementById('joinCode').value.trim();
-    if(!name||!code){ showToast(t('enterNameAndCode'),true); return false; }
-  }
-  return true;
+  if(!name) return showToast(t('enterName'),true);
+  requireRewardedAd(_createRoomReal);
 }
-
-function openSurveyGate(action){
-  const gate=document.getElementById('cpx-gate');
-  if(gate.classList.contains('show')) return;        // مفتوح بالفعل
-  _cpxPendingAction=action;
-  const holder=document.getElementById('cpx-frame-holder');
-  holder.innerHTML='';                                  // iframe جديد في كل مرة
-  const f=document.createElement('iframe');
-  f.width='100%'; f.height='2000px'; f.setAttribute('frameBorder','0');
-  f.src=CPX_ORIGIN+'/index.php?app_id='+CPX_APP_ID+'&ext_user_id='+encodeURIComponent(CPX_USER_ID);
-  holder.appendChild(f);
-  gate.classList.add('show');
-  gate.scrollTop=0;
-  document.body.style.overflow='hidden';
+function joinRoom(){
+  const name=document.getElementById('playerName').value.trim();
+  const code=document.getElementById('joinCode').value.trim();
+  if(!name||!code) return showToast(t('enterNameAndCode'),true);
+  requireRewardedAd(_joinRoomReal);
 }
-
-function completeSurvey(){
-  // لا تنادي هذه الدالة إلا من إشارة إتمام موثّقة.
-  const gate=document.getElementById('cpx-gate');
-  gate.classList.remove('show');
-  document.getElementById('cpx-frame-holder').innerHTML='';
-  document.body.style.overflow='';
-  const a=_cpxPendingAction; _cpxPendingAction=null;
-  if(typeof a==='function') a();
-}
-
-// منع الإغلاق بالـ Escape / الضغط خارج الصندوق
-document.addEventListener('keydown',e=>{
-  if(document.getElementById('cpx-gate').classList.contains('show') && e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); }
-},true);
-
-// ⚠️ نقطة التحقق من إتمام الاستبيان — لازم تتوصل بإشارة حقيقية (راجع الملاحظة).
-window.addEventListener('message',e=>{
-  if(e.origin!==CPX_ORIGIN) return;
-  // مثال: لو CPX/السيرفر بتاعك بيبعت رسالة إتمام بالشكل ده، فعّل السطر التالي:
-  // if(e.data && e.data.type==='survey_completed') completeSurvey();
-});
-
-function createRoom(){ if(_cpxValidate('create')) openSurveyGate(_createRoomReal); }
-function joinRoom(){   if(_cpxValidate('join'))   openSurveyGate(_joinRoomReal); }
+function playAgain(){ requireRewardedAd(_playAgainReal); }
 
 function copyCode(){
   navigator.clipboard.writeText(roomCode);
@@ -1105,7 +1113,7 @@ function startGame(){
   socket.emit('start_game');
 }
 
-function playAgain(){
+function _playAgainReal(){
   socket.emit('reset_room');
 }
 
