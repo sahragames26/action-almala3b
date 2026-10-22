@@ -1,9 +1,0 @@
-{
-  "name": "action-almala3b",
-  "version": "2.0.0",
-  "description": "Action Almala3b - Online Multiplayer Football Card Game powered by Supabase Realtime",
-  "scripts": {
-    "start": "npx serve ."
-  },
-  "keywords": ["game", "football", "cards", "supabase", "realtime"]
-}
