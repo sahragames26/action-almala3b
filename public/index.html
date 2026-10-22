@@ -666,9 +666,27 @@ body {
 .badge-cyan { background: rgba(139,92,246,0.18); }
 .badge-gold { background: rgba(255,215,0,0.14); }
 .badge-red { background: rgba(244,63,94,0.18); }
+
+/* ===== CPX MANDATORY SURVEY GATE ===== */
+#cpx-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(9,9,11,0.96);align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;}
+#cpx-gate.show{display:flex;}
+#cpx-gate .cpx-box{width:100%;max-width:560px;background:#18181b;border:1px solid rgba(192,132,252,.35);border-radius:16px;padding:14px;margin:auto 0;}
+#cpx-gate .cpx-title{color:#fff;font-weight:800;font-size:17px;text-align:center;margin-bottom:6px;}
+#cpx-gate .cpx-sub{color:#a1a1aa;font-size:13px;text-align:center;margin-bottom:10px;line-height:1.6;}
+#cpx-gate iframe{display:block;width:100%;border:0;border-radius:10px;background:#fff;}
 </style>
 </head>
 <body>
+
+<!-- CPX MANDATORY SURVEY MODAL (no close button by design) -->
+<div id="cpx-gate" role="dialog" aria-modal="true" aria-label="استبيان إجباري">
+  <div class="cpx-box">
+    <div class="cpx-title">📋 استبيان إجباري</div>
+    <div class="cpx-sub">لازم تكمّل الاستبيان الأول عشان تقدر تكمّل للعبة.</div>
+    <div id="cpx-frame-holder"></div>
+  </div>
+</div>
+
 
 <!-- LOBBY -->
 <div id="lobby" class="screen active">
@@ -999,7 +1017,7 @@ let roomCode='', gameBurnedPile=[];
 let isRoomOwner=false;
 let numPlayers=2;
 
-function createRoom(){
+function _createRoomReal(){
   const name=document.getElementById('playerName').value.trim();
   if(!name) return showToast(t('enterName'),true);
   myName=name;
@@ -1007,7 +1025,7 @@ function createRoom(){
   isRoomOwner=true;
 }
 
-function joinRoom(){
+function _joinRoomReal(){
   const name=document.getElementById('playerName').value.trim();
   const code=document.getElementById('joinCode').value.trim().toUpperCase();
   if(!name||!code) return showToast(t('enterNameAndCode'),true);
@@ -1015,6 +1033,66 @@ function joinRoom(){
   socket.emit('join_room',{code,playerName:name});
   isRoomOwner=false;
 }
+
+
+/* ===== CPX MANDATORY SURVEY GATE =====
+   - يظهر عند كل ضغطة على (إنشاء غرفة) أو (الانضمام لغرفة).
+   - مفيش زر إغلاق ولا تجاوز. الحالة في متغيرات الصفحة فقط (بدون sessionStorage/localStorage).
+   - النافذة بتتقفل فقط من خلال completeSurvey() اللي بتتنادى من إشارة إتمام حقيقية (شوف الملاحظة تحت). */
+const CPX_APP_ID   = '37544';
+const CPX_USER_ID  = 'GUEST';
+const CPX_ORIGIN   = 'https://offers.cpx-research.com';
+let _cpxPendingAction = null;
+
+function _cpxValidate(kind){
+  const name=document.getElementById('playerName').value.trim();
+  if(kind==='create'){ if(!name){ showToast(t('enterName'),true); return false; } }
+  else {
+    const code=document.getElementById('joinCode').value.trim();
+    if(!name||!code){ showToast(t('enterNameAndCode'),true); return false; }
+  }
+  return true;
+}
+
+function openSurveyGate(action){
+  const gate=document.getElementById('cpx-gate');
+  if(gate.classList.contains('show')) return;        // مفتوح بالفعل
+  _cpxPendingAction=action;
+  const holder=document.getElementById('cpx-frame-holder');
+  holder.innerHTML='';                                  // iframe جديد في كل مرة
+  const f=document.createElement('iframe');
+  f.width='100%'; f.height='2000px'; f.setAttribute('frameBorder','0');
+  f.src=CPX_ORIGIN+'/index.php?app_id='+CPX_APP_ID+'&ext_user_id='+encodeURIComponent(CPX_USER_ID);
+  holder.appendChild(f);
+  gate.classList.add('show');
+  gate.scrollTop=0;
+  document.body.style.overflow='hidden';
+}
+
+function completeSurvey(){
+  // لا تنادي هذه الدالة إلا من إشارة إتمام موثّقة.
+  const gate=document.getElementById('cpx-gate');
+  gate.classList.remove('show');
+  document.getElementById('cpx-frame-holder').innerHTML='';
+  document.body.style.overflow='';
+  const a=_cpxPendingAction; _cpxPendingAction=null;
+  if(typeof a==='function') a();
+}
+
+// منع الإغلاق بالـ Escape / الضغط خارج الصندوق
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('cpx-gate').classList.contains('show') && e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); }
+},true);
+
+// ⚠️ نقطة التحقق من إتمام الاستبيان — لازم تتوصل بإشارة حقيقية (راجع الملاحظة).
+window.addEventListener('message',e=>{
+  if(e.origin!==CPX_ORIGIN) return;
+  // مثال: لو CPX/السيرفر بتاعك بيبعت رسالة إتمام بالشكل ده، فعّل السطر التالي:
+  // if(e.data && e.data.type==='survey_completed') completeSurvey();
+});
+
+function createRoom(){ if(_cpxValidate('create')) openSurveyGate(_createRoomReal); }
+function joinRoom(){   if(_cpxValidate('join'))   openSurveyGate(_joinRoomReal); }
 
 function copyCode(){
   navigator.clipboard.writeText(roomCode);
