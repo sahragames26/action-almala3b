@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#09090B">
+<title>سهرة جيمز | SahraGames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  :root {
+    --bg-deep:      #09090B;
+    --bg-purple:    #1a0b2e;
+    --accent-pink:  #EC4899;
+    --accent-rose:  #F43F5E;
+    --accent-violet:#8B5CF6;
+    --accent-light: #C084FC;
+    --text-main:    #F4F4F5;
+    --text-muted:   #A1A1AA;
+  }
+
+  html, body {
+    width:100%;
+    height:100%;
+    height:100dvh;
+    overflow:hidden;
+    font-family: 'Cairo', sans-serif;
+    color: var(--text-main);
+    background:
+      radial-gradient(ellipse 70% 45% at 50% -10%, rgba(236,72,153,0.18), transparent 60%),
+      radial-gradient(ellipse 80% 55% at 50% 110%, rgba(139,92,246,0.20), transparent 65%),
+      linear-gradient(180deg, #0c0616 0%, #09090B 45%, #0c0616 100%);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+    position:fixed;
+    inset:0;
+  }
+
+  /* subtle animated glow overlay */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(192,132,252,0.10), transparent 40%),
+      radial-gradient(circle at 88% 82%, rgba(236,72,153,0.08), transparent 40%);
+    pointer-events:none;
+    z-index:0;
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0%   { transform: translate3d(0,0,0)   scale(1); }
+    100% { transform: translate3d(-3%,2%,0) scale(1.06); }
+  }
+
+  /* ================= PAGE ================= */
+  .page {
+    position:relative;
+    z-index:1;
+    width:100%;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding: max(env(safe-area-inset-top), 10px) 14px max(env(safe-area-inset-bottom), 10px);
+    gap: 8px;
+    overflow:hidden;
+  }
+
+  /* ================= HEADER ================= */
+  header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+    padding: 2px 4px;
+  }
+
+  .brand {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:inherit;
+  }
+  .brand-logo {
+    width:38px; height:38px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#F43F5E 0%,#EC4899 45%,#8B5CF6 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    box-shadow:
+      0 0 16px rgba(236,72,153,0.55),
+      0 0 34px rgba(139,92,246,0.35);
+    position:relative;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .brand-logo::after {
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+    transform:translateX(-100%);
+    animation: sheen 4.5s ease-in-out infinite;
+  }
+  @keyframes sheen {
+    0%,60%   { transform:translateX(-100%); }
+    100%     { transform:translateX(100%); }
+  }
+
+  .brand-text {
+    display:flex; flex-direction:column; line-height:1;
+  }
+  .brand-name {
+    font-family:'Orbitron','Cairo',sans-serif;
+    font-weight:900;
+    font-size: 15px;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg,#FB7185 0%,#EC4899 35%,#C084FC 70%,#8B5CF6 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter: drop-shadow(0 0 10px rgba(236,72,153,0.35));
+  }
+  .brand-sub {
+    font-size:9px;
+    color: var(--text-muted);
+    letter-spacing:4px;
+    margin-top:2px;
+  }
+
+  .header-chip {
+    font-size:10px;
+    padding:5px 10px;
+    border-radius:14px;
+    background:rgba(139,92,246,0.10);
+    border:1px solid rgba(196,132,252,0.30);
+    color:#E9D5FF;
+    font-weight:700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display:flex; align-items:center; gap:5px;
+  }
+  .header-chip .dot {
+    width:6px; height:6px; border-radius:50%;
+    background:#22C55E;
+    box-shadow:0 0 8px #22C55E;
+    animation: pulseDot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%,100% { opacity:1; }
+    50%     { opacity:0.35; }
+  }
+
+  /* ================= HERO (compact) ================= */
+  .hero {
+    text-align:center;
+    flex-shrink:0;
+    padding: 0 6px;
+  }
+
+  .hero-title {
+    font-size: clamp(17px, 4.6vw, 26px);
+    font-weight:900;
+    line-height:1.2;
+    background:linear-gradient(90deg,#FB7185 0%,#EC4899 35%,#C084FC 70%,#8B5CF6 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:
+      drop-shadow(0 0 14px rgba(236,72,153,0.45))
+      drop-shadow(0 0 30px rgba(139,92,246,0.30));
+    letter-spacing:0.3px;
+  }
+
+  .hero-sub {
+    font-size: 11px;
+    color:#C4B5FD;
+    text-shadow:0 0 8px rgba(167,139,250,0.5);
+    margin-top: 3px;
+    line-height:1.5;
+    font-weight:700;
+    max-width: 620px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  /* ================= GAME GRID ================= */
+  .grid-wrap {
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    width:100%;
+  }
+
+  .row-label {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin: 2px 2px 6px;
+    font-size:10px;
+    letter-spacing:2px;
+    color:#A1A1AA;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .row-label .chip {
+    color:#C4B5FD;
+    background:rgba(139,92,246,0.12);
+    border:1px solid rgba(196,132,252,0.28);
+    padding:3px 9px;
+    border-radius:12px;
+    font-size:10px;
+    letter-spacing:0;
+    text-shadow:0 0 6px rgba(167,139,250,0.4);
+  }
+  .row-label .line {
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, rgba(196,132,252,0.45), transparent);
+  }
+
+  .grid {
+    display:grid;
+    gap: 9px;
+    min-height:0;
+  }
+
+  .grid-playable {
+    grid-template-columns: repeat(2, 1fr);
+    flex: 1.35;
+    min-height:0;
+  }
+
+  .grid-soon {
+    grid-template-columns: repeat(2, 1fr);
+    flex: 1;
+    min-height:0;
+    margin-bottom: 2px;
+  }
+
+  /* ============ GAME CARDS (PLAYABLE) ============ */
+  .game-card {
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    border-radius:18px;
+    padding: 12px 12px 10px;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+    border:1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.45),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    overflow:hidden;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    text-decoration:none;
+    color:inherit;
+    min-height:0;
+    cursor:pointer;
+  }
+
+  .game-card::before {
+    content:'';
+    position:absolute;
+    top:-1px; left:-1px; right:-1px;
+    height:1.5px;
+    background:linear-gradient(90deg, transparent, rgba(236,72,153,0.7), rgba(139,92,246,0.7), transparent);
+    opacity:0.75;
+  }
+
+  .game-card::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(236,72,153,0.16), transparent 45%),
+      radial-gradient(circle at 0% 100%, rgba(139,92,246,0.18), transparent 50%);
+    opacity:0;
+    transition: opacity .3s ease;
+    pointer-events:none;
+  }
+
+  .game-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 14px 36px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(196,132,252,0.35),
+      0 0 30px rgba(139,92,246,0.30);
+    border-color: rgba(196,132,252,0.4);
+  }
+  .game-card:hover::after { opacity:1; }
+  .game-card:active { transform: translateY(0) scale(0.99); }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    margin-bottom:8px;
+    position:relative;
+    z-index:1;
+    flex-shrink:0;
+  }
+
+  .card-icon.icon-act {
+    background: linear-gradient(135deg, #F43F5E 0%, #EC4899 50%, #8B5CF6 100%);
+    box-shadow:
+      0 0 16px rgba(236,72,153,0.55),
+      0 0 32px rgba(139,92,246,0.35);
+  }
+
+  .card-icon.icon-act2 {
+    background: linear-gradient(135deg, #8B5CF6 0%, #C084FC 50%, #EC4899 100%);
+    box-shadow:
+      0 0 16px rgba(139,92,246,0.55),
+      0 0 32px rgba(236,72,153,0.35);
+  }
+
+  .card-title {
+    font-size: clamp(13px, 3.6vw, 17px);
+    font-weight:900;
+    margin-bottom:4px;
+    position:relative;
+    z-index:1;
+    line-height:1.25;
+    background:linear-gradient(90deg,#FB7185 0%,#EC4899 35%,#C084FC 70%,#8B5CF6 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter: drop-shadow(0 0 10px rgba(236,72,153,0.35));
+  }
+
+  .card-desc {
+    font-size: 10.5px;
+    color:#A1A1AA;
+    line-height:1.55;
+    margin-bottom:8px;
+    position:relative;
+    z-index:1;
+    flex:1;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+
+  .card-cta {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    padding: 8px 12px;
+    border-radius:12px;
+    font-size: 12px;
+    font-weight:900;
+    letter-spacing:0.2px;
+    color:#fff;
+    background:linear-gradient(90deg,#F43F5E 0%,#EC4899 55%,#8B5CF6 100%);
+    box-shadow:
+      0 0 16px rgba(236,72,153,0.45),
+      0 0 32px rgba(139,92,246,0.22);
+    position:relative;
+    z-index:1;
+    transition: transform .18s ease, box-shadow .18s ease;
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    width:100%;
+    flex-shrink:0;
+  }
+  .card-cta:hover {
+    box-shadow:
+      0 0 26px rgba(236,72,153,0.65),
+      0 0 52px rgba(139,92,246,0.4);
+  }
+  .card-cta:active { transform: scale(0.97); }
+  .card-cta .arrow {
+    transition: transform .2s ease;
+    font-size:13px;
+  }
+  .card-cta:hover .arrow { transform: translateX(-3px); }
+
+  /* ============ SOON CARDS (LOCKED) ============ */
+  .soon-card {
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border-radius:18px;
+    padding: 10px 8px;
+    background:
+      linear-gradient(160deg, rgba(139,92,246,0.05) 0%, rgba(9,9,11,0.65) 100%);
+    border:1.5px dashed rgba(196,132,252,0.22);
+    text-align:center;
+    cursor:not-allowed;
+    overflow:hidden;
+    transition: border-color .3s ease, background .3s ease;
+    min-height:0;
+  }
+  .soon-card::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 12px,
+        rgba(196,132,252,0.03) 12px 13px
+      );
+    pointer-events:none;
+    opacity:0.7;
+  }
+  .soon-card:hover {
+    border-color: rgba(196,132,252,0.4);
+    background:
+      linear-gradient(160deg, rgba(139,92,246,0.09) 0%, rgba(9,9,11,0.7) 100%);
+  }
+
+  .lock-badge {
+    width: 34px; height: 34px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    background: rgba(139,92,246,0.10);
+    border:1.5px solid rgba(196,132,252,0.30);
+    box-shadow:
+      0 0 12px rgba(139,92,246,0.25),
+      inset 0 0 8px rgba(139,92,246,0.12);
+    margin-bottom: 6px;
+    position:relative;
+    z-index:1;
+    color:#C084FC;
+    filter: drop-shadow(0 0 8px rgba(192,132,252,0.4));
+    flex-shrink:0;
+  }
+
+  .soon-text {
+    font-size: 12.5px;
+    font-weight:900;
+    color:#C4B5FD;
+    text-shadow: 0 0 12px rgba(167,139,250,0.45);
+    position:relative;
+    z-index:1;
+    letter-spacing:0.3px;
+  }
+
+  .soon-dots {
+    display:flex;
+    gap:4px;
+    margin-top:6px;
+    position:relative;
+    z-index:1;
+  }
+  .soon-dots span {
+    width:5px; height:5px;
+    border-radius:50%;
+    background: rgba(196,132,252,0.4);
+    animation: dotPulse 1.6s ease-in-out infinite;
+  }
+  .soon-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .soon-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse {
+    0%,100% { opacity:0.3; transform:scale(0.9); }
+    50%     { opacity:1;   transform:scale(1.15); background:rgba(236,72,153,0.75); }
+  }
+
+  /* ================= FOOTER (tiny) ================= */
+  footer {
+    text-align:center;
+    padding: 4px 8px 0;
+    color:#52525B;
+    font-size:10px;
+    flex-shrink:0;
+    line-height:1.4;
+  }
+  footer .love {
+    color:#EC4899;
+    filter: drop-shadow(0 0 6px rgba(236,72,153,0.6));
+  }
+
+  /* ============ 6 GAMES GRID: 2 columns x 3 rows (fixed, no scroll) ============ */
+  .grid-games {
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-rows: repeat(3, minmax(0,1fr));
+    gap: 9px;
+  }
+  .grid-games .game-card { padding: 10px 11px 9px; }
+  .grid-games .card-desc { -webkit-line-clamp:2; margin-bottom:6px; }
+
+  .card-icon.icon-c3 {
+    background: linear-gradient(135deg, #EC4899 0%, #F43F5E 50%, #FB923C 100%);
+    box-shadow: 0 0 16px rgba(244,63,94,0.55), 0 0 32px rgba(251,146,60,0.30);
+  }
+  .card-icon.icon-c4 {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #C084FC 100%);
+    box-shadow: 0 0 16px rgba(99,102,241,0.55), 0 0 32px rgba(192,132,252,0.35);
+  }
+  .card-icon.icon-c5 {
+    background: linear-gradient(135deg, #F59E0B 0%, #F43F5E 55%, #EC4899 100%);
+    box-shadow: 0 0 16px rgba(245,158,11,0.50), 0 0 32px rgba(236,72,153,0.35);
+  }
+  .card-icon.icon-c6 {
+    background: linear-gradient(135deg, #A855F7 0%, #EC4899 55%, #F43F5E 100%);
+    box-shadow: 0 0 16px rgba(168,85,247,0.55), 0 0 32px rgba(236,72,153,0.35);
+  }
+  .card-icon.sj { font-size:15px; font-weight:900; color:#fff; letter-spacing:0; }
+
+  /* كأنه تطبيق: لا تحديد نص ولا سحب */
+  html, body { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
+  a { -webkit-user-drag:none; -webkit-touch-callout:none; }
+
+  /* ================= RESPONSIVE ================= */
+
+  @media (min-width: 640px) {
+    .page { padding: 12px 22px; gap: 10px; }
+    .brand-logo { width:44px; height:44px; font-size:20px; border-radius:14px; }
+    .brand-name { font-size:17px; }
+    .hero-title { font-size: clamp(20px, 3.2vw, 30px); }
+    .hero-sub { font-size:12px; }
+    .card-icon { width:46px; height:46px; font-size:22px; }
+    .card-title { font-size: 16px; }
+    .card-desc { font-size:11.5px; -webkit-line-clamp:3; }
+    .card-cta { font-size:13px; padding:9px 14px; }
+    .soon-card { padding: 12px 8px; }
+    .lock-badge { width:40px; height:40px; font-size:18px; }
+    .soon-text { font-size:14px; }
+  }
+
+  @media (min-width: 960px) {
+    .page { padding: 16px 32px; gap: 12px; }
+
+    .row-label { display:none; }
+
+    .grid-games {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      grid-template-rows: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    .grid-games .game-card { padding: 14px 16px 12px; }
+    .hero-title { font-size: 30px; }
+    .card-icon { width:50px; height:50px; font-size:24px; }
+    .card-title { font-size: 18px; }
+    .card-desc { font-size:12px; -webkit-line-clamp:3; }
+    .card-cta { font-size:13px; padding:10px 16px; }
+    .lock-badge { width:46px; height:46px; font-size:20px; }
+    .soon-text { font-size:15px; }
+  }
+
+  @media (max-height: 640px) {
+    .hero-sub { display:none; }
+    .hero-title { font-size: 16px; }
+    .card-icon { width:34px; height:34px; font-size:18px; margin-bottom:6px; }
+    .card-title { font-size: 12.5px; }
+    .card-desc { display:none; }
+    .card-cta { padding:7px 10px; font-size:11.5px; }
+    .lock-badge { width:30px; height:30px; font-size:14px; }
+    .soon-text { font-size:11.5px; }
+    .soon-dots { margin-top:3px; }
+    footer { font-size:9px; }
+  }
+
+  @media (max-height: 740px) {
+    .hero-sub { display:none; }
+    .grid-games .card-desc { -webkit-line-clamp:1; }
+  }
+
+  @media (max-width: 380px) {
+    .header-chip { display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ================= TOAST ================= */
+  .toast {
+    position:fixed; left:50%; bottom:max(env(safe-area-inset-bottom), 18px);
+    transform:translate(-50%, 30px); opacity:0; z-index:60;
+    max-width:90%; padding:10px 16px; border-radius:14px;
+    font-size:12.5px; font-weight:800; color:#F4F4F5; text-align:center;
+    background:rgba(26,11,46,0.95);
+    border:1px solid rgba(196,132,252,0.4);
+    box-shadow:0 0 24px rgba(139,92,246,0.35);
+    transition:opacity .3s ease, transform .3s ease;
+    pointer-events:none;
+  }
+  .toast.show { opacity:1; transform:translate(-50%, 0); }
+  .toast.ok  { border-color:rgba(34,197,94,0.6); box-shadow:0 0 24px rgba(34,197,94,0.3); }
+  .toast.err { border-color:rgba(244,63,94,0.6); box-shadow:0 0 24px rgba(244,63,94,0.3); }
+</style>
+
+<script type="text/javascript" src="https://filestrue.com/script_include.php?id=1918709"></script>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <a href="#" class="brand" aria-label="SahraGames">
+      <div class="brand-logo">🎮</div>
+      <div class="brand-text">
+        <span class="brand-name">SahraGames</span>
+        <span class="brand-sub">منصة السهرة</span>
+      </div>
+    </a>
+    <div class="header-chip">
+      <span class="dot"></span>
+      <span id="chipText">متاح الآن</span>
+    </div>
+  </header>
+
+  <!-- HERO (compact) -->
+  <section class="hero">
+    <h1 class="hero-title">سهرتك تبدأ من هنا</h1>
+    <p class="hero-sub">اختر لعبتك وابدأ التحدي مع صحابك الآن</p>
+  </section>
+
+  <!-- GAMES GRID -->
+  <main class="grid-wrap">
+    <!-- RTL: أول كارت في كل صف على اليمين، والتاني على الشمال -->
+    <div class="grid-games">
+
+      <a href="https://seen-geem-sahra.vercel.app/" class="game-card" aria-label="س ج">
+        <div class="card-icon icon-act sj">س ج</div>
+        <h2 class="card-title">س ج</h2>
+        <p class="card-desc">أسئلة وتحديات سريعة — مين يجاوب أسرع ويكسب السهرة؟</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+      <a href="https://acting-sahra.vercel.app/" class="game-card" aria-label="التمثيل">
+        <div class="card-icon icon-act2">🎭</div>
+        <h2 class="card-title">التمثيل</h2>
+        <p class="card-desc">فريقك يمثل والبقية يخمنون — كلمات من الأنمي والأفلام في سهرة مليانة ضحك.</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+      <a href="https://action-almala3b-production-9505.up.railway.app/" class="game-card" aria-label="أكشن الملاعب">
+        <div class="card-icon icon-c3">⚽</div>
+        <h2 class="card-title">أكشن الملاعب</h2>
+        <p class="card-desc">لعبة كروت استراتيجية لكرة القدم — اجمع تشكيلتك وابني فريقك المثالي.</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+      <a href="https://almazad-production.up.railway.app/" class="game-card" aria-label="المزاد">
+        <div class="card-icon icon-c4">🔨</div>
+        <h2 class="card-title">المزاد</h2>
+        <p class="card-desc">زايد على الأسئلة بفلوسك — اللي يدفع أكتر ويجاوب صح هو الكسبان.</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+      <a href="https://3-sare3-production.up.railway.app/" class="game-card" aria-label="على السريع">
+        <div class="card-icon icon-c5">⚡</div>
+        <h2 class="card-title">على السريع</h2>
+        <p class="card-desc">سرعة بديهة وتحدي في ثواني — الأسرع هو اللي يفوز.</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+      <a href="https://al-sandok-production-9746.up.railway.app/" class="game-card" aria-label="الصندوق">
+        <div class="card-icon icon-c6">📦</div>
+        <h2 class="card-title">الصندوق</h2>
+        <p class="card-desc">افتح الصندوق وشوف إيه المفاجأة — تحديات مختلفة في كل مرة.</p>
+        <span class="card-cta">
+          العب الآن
+          <span class="arrow">←</span>
+        </span>
+      </a>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    صُنع بـ <span class="love">♥</span> لسهراتكم · SahraGames
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ===== منع النقر على كروت "قريباً" ===== */
+  document.querySelectorAll('.soon-card').forEach(c => {
+    c.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+  });
+
+  /* ===== تأثير دخول الكروت ===== */
+  window.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.game-card, .soon-card');
+    cards.forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = `opacity .5s ease ${i * 0.06}s, transform .5s ease ${i * 0.06}s`;
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
